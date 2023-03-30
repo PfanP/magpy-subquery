@@ -1,0 +1,61 @@
+specVersion: 1.0.0
+name: sparrowswap
+version: 0.0.1
+runner:
+  node:
+    name: "@subql/node-cosmos"
+    version: "*"
+  query:
+    name: "@subql/query"
+    version: "*"
+description: >-
+  sparrowswap subquery
+repository: "https://github.com/subquery/juno-subql-starter"
+schema:
+  file: ./schema.graphql
+network:
+  chainId: atlantic-2
+  # This endpoint must be a public non-pruned archive node
+  # Public nodes may be rate limited, which can affect indexing speed
+  # When developing your project we suggest getting a private API key
+  endpoint: https://rpc.atlantic-2.seinetwork.io
+  # Optionally provide the HTTP endpoint of a full chain dictionary to speed up processing
+  chainTypes:
+    cosmos.slashing.v1beta1:
+      file: ./proto/cosmos/slashing/v1beta1/tx.proto
+      messages:
+        - MsgUnjail
+    cosmos.gov.v1beta1:
+      file: ./proto/cosmos/gov/v1beta1/tx.proto
+      messages:
+        - MsgVoteWeighted
+    cosmos.gov.v1beta1.gov:
+      file: ./proto/cosmos/gov/v1beta1/gov.proto
+      messages:
+        - WeightedVoteOption
+dataSources:
+  - kind: cosmos/Runtime
+    startBlock: 4100000
+    mapping:
+      file: "./dist/index.js"
+      handlers:
+        - handler: handleSwapMessage
+          kind: cosmos/MessageHandler
+          filter:
+            type: "/cosmwasm.wasm.v1.MsgExecuteContract"
+            contractCall: "swap"
+            contract: "sei1q7dnaw38r526w7spjj9t6uarjkygjtp0ff7pu6uqhcea7cjvn3hqjfs3k7"
+        # - handler: handleExecuteRequestEvent
+        #   kind: cosmos/EventHandler
+        #   filter:
+        #     type: wasm
+        #     attributes:
+        #       _contract_address: "sei1q7dnaw38r526w7spjj9t6uarjkygjtp0ff7pu6uqhcea7cjvn3hqjfs3k7"
+        #       action: "execute_request"
+        # - handler: handleCancelRequestEvent
+        #   kind: cosmos/EventHandler
+        #   filter:
+        #     type: wasm
+        #     attributes:
+        #       _contract_address: "sei1q7dnaw38r526w7spjj9t6uarjkygjtp0ff7pu6uqhcea7cjvn3hqjfs3k7"
+        #       action: "cancel_request"
